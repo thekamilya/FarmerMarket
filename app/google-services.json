@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "133467242574",
+    "firebase_url": "https://chat-18870-default-rtdb.firebaseio.com",
+    "project_id": "chat-18870",
+    "storage_bucket": "chat-18870.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:133467242574:android:0a0483db3fa3e89997c31f",
+        "android_client_info": {
+          "package_name": "com.example.farmermarket"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBu8jRltocG_P1ASbHDB0YgJEAxHcgUt1E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:133467242574:android:b92efd1d99f7164e97c31f",
+        "android_client_info": {
+          "package_name": "com.example.testproj"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBu8jRltocG_P1ASbHDB0YgJEAxHcgUt1E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

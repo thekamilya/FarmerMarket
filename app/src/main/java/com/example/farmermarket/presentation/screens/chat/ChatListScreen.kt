@@ -1,20 +1,27 @@
 package com.example.testproj.presentation.screens
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -33,37 +41,52 @@ import com.example.farmermarket.R
 import com.example.farmermarket.common.Constants.userName
 import com.example.farmermarket.data.remote.dto.Conversation
 import com.example.farmermarket.presentation.MyViewModel
-import com.example.farmermarket.presentation.Screens
+
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ChatListScreen( navController: NavHostController, viewModel: MyViewModel){
 
-//    LaunchedEffect(Unit) {
-//        viewModel.getChats("jong")
-//
-//    }
-    val chatList = viewModel.chatList
-    Log.i("kama", "this is chatlist" + chatList.value.toString())
 
-    LazyColumn(){
-        item{
-            Text(text = "ChatList")
+
+    val chatList = viewModel.chatListState.value.chatResponse
+
+    if(viewModel.chatListState.value.isLoading) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator(color = Color(0xFFA8C10F), strokeWidth = 4.dp)
         }
-        items(chatList.value){chat->
+    }else if (viewModel.chatListState.value.error != ""){
+        Column(modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally){
+            Text(text = "Network error")
+        }
+    }
+    LazyColumn(modifier = Modifier.fillMaxHeight()){
+
+        items(chatList){chat->
             viewModel.selectedParticipantName.value = getParticipantName(
                 participants = chat.participants,
                 userName = "kamila"
             )
             ChatListItem(conversation = chat, userName = userName) {id->
                 viewModel.selectedChatId.value = id
-                navController.navigate(Screens.CHAT.name)
+//                navController.navigate(Screens.CHAT.name)
                 viewModel.getChat(id)
             }
         }
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ChatListItem(
     conversation: Conversation,
@@ -82,7 +105,7 @@ fun ChatListItem(
         Spacer(modifier = Modifier.width(10.dp))
         // Example placeholder profile picture (you can replace it with participants' profile pics)
         Image(
-            painter = rememberAsyncImagePainter(model = R.drawable.ic_launcher_foreground), // Replace with actual image URL
+            painter = rememberAsyncImagePainter(model = R.drawable.avatarimage), // Replace with actual image URL
             contentDescription = "Profile Picture",
             modifier = Modifier
                 .size(48.dp)
@@ -132,7 +155,31 @@ fun getParticipantName(participants: Map<String, Boolean>, userName: String): St
     return otherParticipant ?: "Unknown"
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 fun formatTimestamp(timestamp: Long): String {
-    // Example timestamp formatting (you can customize this)
-    return "12:34 PM" // Placeholder, use actual formatting logic
+    // Convert the timestamp to an Instant
+    val instant = Instant.ofEpochSecond(timestamp)
+
+
+
+    // Format the Instant to a human-readable string using a DateTimeFormatter
+    val formatter1 = DateTimeFormatter.ofPattern("HH:mm")
+        .withZone(ZoneId.of("UTC"))
+
+    val formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        .withZone(ZoneId.of("UTC"))
+    Log.i("KAMA", (System.currentTimeMillis() / 1000).toString() + "   " + formatter2.format(instant))
+
+
+
+
+    if ((System.currentTimeMillis() / 1000).toString()  == formatter2.format(instant)){
+
+        return formatter1.format(instant)
+    } else{
+        return formatter2.format(instant)
+    }
+
+
+//    return formatter.format(instant)
 }

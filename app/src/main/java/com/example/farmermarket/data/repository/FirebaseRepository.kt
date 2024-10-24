@@ -8,6 +8,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 
+class DatabaseOperationException(message: String) : Exception(message)
 class FirebaseRepository {
 
     val database = FirebaseDatabase.getInstance()
@@ -43,13 +44,12 @@ class FirebaseRepository {
 
                 override fun onCancelled(error: DatabaseError) {
                     // Handle error
-                    onChatRoomsRetrieved(emptyList())
-                    Log.i("kama", "cancelled 2")
+                    throw DatabaseOperationException("Disconnected from Firebase server. Please try again later.")
                 }
             })
     }
 
-    fun getChatsForUser(userName: String, onConversationsRetrieved: (List<Conversation>) -> Unit) {
+    suspend fun getChatsForUser(userName: String, onConversationsRetrieved: (List<Conversation>) -> Unit) {
 
         // Step 1: Find userId by userName
 
@@ -66,8 +66,8 @@ class FirebaseRepository {
 
                 override fun onCancelled(error: DatabaseError) {
                     // Handle error
-                    onConversationsRetrieved(emptyList())
-                    Log.i("kama", "cancelled 1")
+//                    throw DatabaseOperationException("Disconnected from Firebase server. Please try again later.")
+                    Log.i("ERR", error.message)
                 }
             })
 
@@ -95,8 +95,7 @@ class FirebaseRepository {
             }
 
             override fun onCancelled(error: DatabaseError) {
-                // Handle any errors here (e.g., log them)
-                onConversationRetrieved(emptyList())  // Return an empty list on error
+
             }
         })
     }

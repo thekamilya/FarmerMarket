@@ -15,20 +15,30 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,8 +50,10 @@ import com.example.farmermarket.R
 import com.example.farmermarket.common.Constants.userName
 import com.example.farmermarket.data.remote.dto.Message
 import com.example.farmermarket.presentation.MyViewModel
+import kotlinx.coroutines.launch
 import okhttp3.internal.http2.Header
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(navController: NavHostController, viewModel: MyViewModel){
 
@@ -51,7 +63,19 @@ fun ChatScreen(navController: NavHostController, viewModel: MyViewModel){
         ChatHeader(viewModel.selectedParticipantName.value)
         val messagesList = viewModel.messageList
 
-        LazyColumn(modifier = Modifier.fillMaxHeight(0.9F)){
+        val listState = rememberLazyListState()
+        val coroutineScope = rememberCoroutineScope()
+
+        LaunchedEffect(messagesList.value.size) {
+            // Scroll to the last item when the size of the list changes
+            if (messagesList.value.isNotEmpty()) {
+                coroutineScope.launch {
+                    listState.animateScrollToItem(messagesList.value.size - 1)
+                }
+            }
+        }
+
+        LazyColumn(state = listState, modifier = Modifier.fillMaxHeight(0.9F)){
             items(messagesList.value){message->
 
                 MessageElement(message = message)
@@ -66,28 +90,43 @@ fun ChatScreen(navController: NavHostController, viewModel: MyViewModel){
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Input field for typing message
-            TextField(
-                value = message,
-                onValueChange = { message = it },  // Update the message state
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp),
-                placeholder = { Text("Type a message") }
-            )
+            Row {
+                TextField(
+                    shape = RoundedCornerShape(16.dp),
+                    value = message,
+                    colors = TextFieldDefaults.textFieldColors(
+                        focusedIndicatorColor = Color.Transparent,  // Remove underline when focused
+                        unfocusedIndicatorColor = Color.Transparent  // Remove underline when unfocused
+                    ),
+                    onValueChange = { message = it },  // Update the message state
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp),
+                    placeholder = { Text("Type a message") }
+                )
 
-            // Send button
-            Button(
-                onClick = {
-                    // Logic to send the message
-                    if (message.isNotEmpty()) {
-                        // Call your send message function here
-                        viewModel.sendMessage(viewModel.selectedChatId.value,message, userName )
-                    }
-                },
-                enabled = message.isNotEmpty()  // Disable the button when message is empty
-            ) {
-                Text("Send")
+                // Send button
+                IconButton(
+
+                    onClick = {
+                        // Logic to send the message
+                        if (message.isNotEmpty()) {
+
+                            // Call your send message function here
+                            viewModel.sendMessage(viewModel.selectedChatId.value,message, userName )
+                            message = ""
+                        }
+                    },
+                    enabled = message.isNotEmpty()  // Disable the button when message is empty
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Send,  // You can replace this with your own icon
+                        contentDescription = "Send Message"
+                    )
+
+                }
             }
+
         }
     }
 
@@ -108,7 +147,7 @@ fun ChatHeader(participantName: String){
             Spacer(modifier = Modifier.width(25.dp))
             // Example placeholder profile picture (you can replace it with participants' profile pics)
             Image(
-                painter = rememberAsyncImagePainter(model = R.drawable.ic_launcher_foreground), // Replace with actual image URL
+                painter = rememberAsyncImagePainter(model = R.drawable.avatarimage), // Replace with actual image URL
                 contentDescription = "Profile Picture",
                 modifier = Modifier
                     .size(48.dp)
@@ -165,7 +204,7 @@ fun MessageElement(message: Message){
             Spacer(modifier = Modifier.width(10.dp))
 
             Image(
-                painter = rememberAsyncImagePainter(model = R.drawable.ic_launcher_foreground), // Replace with actual image URL
+                painter = rememberAsyncImagePainter(model = R.drawable.avatarimage), // Replace with actual image URL
                 contentDescription = "Profile Picture",
                 modifier = Modifier
                     .size(32.dp)
@@ -177,7 +216,7 @@ fun MessageElement(message: Message){
 
         }else{
             Image(
-                painter = rememberAsyncImagePainter(model = R.drawable.ic_launcher_foreground), // Replace with actual image URL
+                painter = rememberAsyncImagePainter(model = R.drawable.avatarimage), // Replace with actual image URL
                 contentDescription = "Profile Picture",
                 modifier = Modifier
                     .size(32.dp)

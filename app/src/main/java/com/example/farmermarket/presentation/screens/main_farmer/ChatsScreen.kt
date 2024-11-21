@@ -1,4 +1,4 @@
-package com.example.testproj.presentation.screens
+package com.example.farmermarket.presentation.screens.main_farmer
 
 import android.os.Build
 import android.util.Log
@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,6 +24,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,13 +33,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.farmermarket.R
-import com.example.farmermarket.common.Constants.userName
+import com.example.farmermarket.common.Constants
 import com.example.farmermarket.data.remote.dto.Conversation
-import com.example.farmermarket.presentation.screens.main_farmer.FarmerViewModel
-
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -45,7 +46,12 @@ import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ChatListScreen( navController: NavHostController, viewModel: FarmerViewModel){
+fun ChatsScreen(navController: NavController, viewModel: FarmerViewModel){
+
+    LaunchedEffect(Unit) {
+        viewModel.getChats(Constants.userName)
+
+    }
 
 
 
@@ -57,7 +63,7 @@ fun ChatListScreen( navController: NavHostController, viewModel: FarmerViewModel
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            CircularProgressIndicator(color = Color(0xFFA8C10F), strokeWidth = 4.dp)
+            CircularProgressIndicator(color = Color(0xff4CAD73), strokeWidth = 4.dp)
         }
     }else if (viewModel.chatListState.value.error != ""){
         Column(modifier = Modifier.fillMaxSize(),
@@ -66,20 +72,38 @@ fun ChatListScreen( navController: NavHostController, viewModel: FarmerViewModel
             Text(text = "Network error")
         }
     }
-    LazyColumn(modifier = Modifier.fillMaxHeight()){
+    Column( horizontalAlignment = Alignment.CenterHorizontally) {
+        
+        Spacer(modifier = Modifier.height(10.dp))
+        
+        Text(text = "Chats", fontWeight = FontWeight.SemiBold, fontSize = 24.sp)
+        
+        Spacer(modifier = Modifier.height(20.dp))
 
-        items(chatList){chat->
-            viewModel.selectedParticipantName.value = getParticipantName(
-                participants = chat.participants,
-                userName = "kamila"
-            )
-            ChatListItem(conversation = chat, userName = userName) {id->
-                viewModel.selectedChatId.value = id
-//                navController.navigate(Screens.CHAT.name)
-                viewModel.getChat(id)
+        Spacer(modifier = Modifier
+            .background(Color.Gray)
+            .fillMaxWidth()
+            .height((0.5).dp))
+
+        LazyColumn(modifier = Modifier.fillMaxHeight()){
+
+            items(chatList){chat->
+                viewModel.selectedParticipantName.value = getParticipantName(
+                    participants = chat.participants,
+                    userName = "kamila"
+                )
+                ChatListItem(conversation = chat, userName = Constants.userName) { id->
+                    viewModel.selectedChatId.value = id
+                    viewModel.getChat(id)
+                    navController.navigate(FarmerScreens.CHAT.name)
+//                viewModel.getChat(id)
+                }
             }
         }
+
     }
+
+
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -92,10 +116,10 @@ fun ChatListItem(
 ) {
     Row(
         modifier = modifier
-            .height(60.dp)
+            .height(92.dp)
             .fillMaxWidth()
             .clickable(onClick = { onClick(conversation.id,) })
-            .background(color = Color.LightGray),
+            .background(color = Color.White),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(modifier = Modifier.width(10.dp))
@@ -104,41 +128,54 @@ fun ChatListItem(
             painter = rememberAsyncImagePainter(model = R.drawable.avatarimage), // Replace with actual image URL
             contentDescription = "Profile Picture",
             modifier = Modifier
-                .size(48.dp)
+                .size(60.dp)
                 .clip(CircleShape)
-                ,
+            ,
             contentScale = ContentScale.Crop
 
         )
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(15.dp))
 
         Column(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
         ) {
             // Participants
-            Text(
-                text = "${getParticipantName(conversation.participants, userName)}",
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+
+            Row( modifier = Modifier.fillMaxWidth().padding(end = 20.dp),
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.SpaceBetween) {
+                Text(
+                    text = "${getParticipantName(conversation.participants, userName)}",
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                    fontSize = 18.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Text(
+                    text = formatTimestamp(conversation.lastMessage.timestamp),
+                    style = MaterialTheme.typography.bodySmall
+                )
+
+
+
+            }
 
             // Last message
             Text(
                 text = "${conversation.lastMessage.text}",
                 style = MaterialTheme.typography.bodyMedium,
+                fontSize = 12.sp,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         }
 
         // Timestamp (you can format the timestamp as needed)
-        Text(
-            text = formatTimestamp(conversation.lastMessage.timestamp),
-            style = MaterialTheme.typography.bodySmall
-        )
-        Spacer(modifier = Modifier.width(10.dp))
+
     }
 }
 

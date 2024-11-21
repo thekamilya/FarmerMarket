@@ -1,9 +1,6 @@
-package com.example.farmermarket.presentation.screens.main_farmer
+package com.example.farmermarket.presentation.screens.main_buyer
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,16 +17,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -38,49 +35,32 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.example.farmermarket.R
-import com.example.farmermarket.data.remote.dto.ProductResponseDtoItem
-import java.io.InputStream
+import com.example.farmermarket.presentation.screens.main_farmer.FarmerScreens
 
 @Composable
-fun MarketScreen( navController: NavController, viewModel: FarmerViewModel){
+fun MarketScreen( navController: NavController){
 
-    LaunchedEffect(Unit) {
-        viewModel.getProducts()
-    }
-
-    val productState = viewModel.productListState.value
-    val productList = viewModel.productListState.value.productResponse
-
-    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,){
-        if(productState.isLoading){
-            CircularProgressIndicator(color = Color(0xff4CAD73), strokeWidth = 4.dp)
-
-        }else if(productState.error != ""){
-            Text(text = "Network error")
-
-        }
-    }
     Image(
         modifier = Modifier
             .padding(0.dp)
             .fillMaxWidth()
-            .height((LocalConfiguration.current.screenHeightDp.dp) / 2.5f),
+            .height((LocalConfiguration.current.screenHeightDp.dp) / 6.5f),
         painter = painterResource(id = R.drawable.frame_217),
         contentDescription = null, // or provide a meaningful description
         contentScale = ContentScale.Crop,
@@ -92,7 +72,7 @@ fun MarketScreen( navController: NavController, viewModel: FarmerViewModel){
 
     Column (modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        ){
+    ){
 
 
         Spacer(modifier = Modifier.height(10.dp))
@@ -164,33 +144,71 @@ fun MarketScreen( navController: NavController, viewModel: FarmerViewModel){
             Spacer(modifier = Modifier.width(8.dp))
             IconButton(
                 onClick = {
-                    navController.navigate(FarmerScreens.ADD_PRODUCT.name)
+
+                },
+                modifier = Modifier.size(30.dp)
+            ) {
+                Icon(
+
+                    imageVector = ImageVector.vectorResource(id = R.drawable.cart_icon ),
+                    contentDescription = "Cart",
+                    tint = Color.White
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            IconButton(
+                onClick = {
+
                 },
                 modifier = Modifier.size(40.dp)
             ) {
                 Icon(
 
-                    imageVector = ImageVector.vectorResource(id = R.drawable.add_icon),
-                    contentDescription = "Add",
+                    imageVector = ImageVector.vectorResource(id = R.drawable.notification_icon),
+                    contentDescription = "Notification",
                     tint = Color.White
                 )
             }
         }
 
 
-//        val products = List(10) {
-//            Product(
-//                id = "sdbsksbcd$it",
-//                productName = "Fresh Carrot",
-//                category = "Vegetables",
-//                description = "The carrot is a root vegetable, most commonly observed as orange in color, " +
-//                        "though purple, black, red, white, and yellow cultivars exist, all of which are " +
-//                        "domesticated forms of the wild carrot, Daucus carota, native to Europe and Southwestern Asia.",
-//                unit = "kg",
-//                pricePerUnit = 15000,
-//                totalReserve = 500,
-//                imageUris = mutableListOf(Uri.parse("https://main-cdn.sbermegamarket.ru/big2/hlr-system/-34/440/660/684/197/100032801902b4.jpg"))
-//            )
+        val products = List(10) {
+            Product(
+                id = "sdbsksbcd$it",
+                productName = "Fresh Carrot",
+                category = "Vegetables",
+                description = "The carrot is a root vegetable, most commonly observed as orange in color, " +
+                        "though purple, black, red, white, and yellow cultivars exist, all of which are " +
+                        "domesticated forms of the wild carrot, Daucus carota, native to Europe and Southwestern Asia.",
+                unit = "kg",
+                pricePerUnit = 15000,
+                totalReserve = 500,
+                farmerDetails = FarmerDetails("cdsdc", "Timmy Farmer", null),
+                imageUris = mutableListOf(Uri.parse("https://main-cdn.sbermegamarket.ru/big2/hlr-system/-34/440/660/684/197/100032801902b4.jpg"))
+            )
+        }
+
+
+//        Text(text = "Categories", fontWeight = FontWeight.SemiBold, fontSize = 18.sp,
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(start = 24.dp))
+//
+//        Spacer(modifier = Modifier.height(15.dp))
+//
+//        LazyRow(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(start = 24.dp),
+//            horizontalArrangement = Arrangement.spacedBy(10.dp) // adds spacing between items
+//        ) {
+//            items(6) { // specify the number of items, or replace with a list if dynamic
+//                CategoryItem(
+//                    name = "vegetables",
+//                    imagePainter = painterResource(id = R.drawable.kisspng_spinach_salad_vegetarian_cuisine_vegetable_clip_ar_spinach_5a753501c985f2_1),
+//                    onClick = {}
+//                )
+//            }
 //        }
 
         Box(
@@ -204,27 +222,26 @@ fun MarketScreen( navController: NavController, viewModel: FarmerViewModel){
                     .fillMaxSize()
                     .padding(top = 16.dp, bottom = 16.dp)
             ) {
-                items(productList.chunked(2)) { productPair ->
+
+                item {
+
+
+                }
+                items(products.chunked(2)) { productPair ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         productPair.forEach { product ->
-//                            viewModel.getImage(product.id, "0" )
-
                             ProductCard(
                                 product = product,
                                 onEditClick = {
                                     navController.navigate(FarmerScreens.EDIT_PRODUCT.name)
                                 },
                                 onCardClick = {
-
                                     navController.navigate(FarmerScreens.PRODUCT_DETAILS.name)
-                                },
-                                viewModel,
-
+                                }
                             )
-
                         }
                     }
                     Spacer(modifier = Modifier.height(20.dp))
@@ -241,7 +258,7 @@ fun MarketScreen( navController: NavController, viewModel: FarmerViewModel){
                     .align(Alignment.TopCenter)
                     .background(
                         brush = Brush.verticalGradient(
-                            colors = listOf(Color(0xFF4CAD73), Color.Transparent)
+                            colors = listOf(Color.White, Color.Transparent)
                         )
                     )
             )
@@ -250,7 +267,12 @@ fun MarketScreen( navController: NavController, viewModel: FarmerViewModel){
     }
 }
 
+data class FarmerDetails(
+    val id: String,
+    val name: String,
+    val imageUri : Uri?
 
+)
 data class Product(
     val id: String,
     val productName : String,
@@ -259,14 +281,37 @@ data class Product(
     val unit: String,
     val pricePerUnit : Int,
     val totalReserve : Int,
-    val imageUris : MutableList<Uri?>
+    val imageUris : MutableList<Uri?>,
+    val farmerDetails: FarmerDetails
+
 )
 @Composable
-fun ProductCard(product: ProductResponseDtoItem, onEditClick: () -> Unit, onCardClick: () -> Unit, viewModel: FarmerViewModel){
+fun CategoryItem(name: String, imagePainter: Painter, onClick: (String) -> Unit) {
+    Column(modifier = Modifier.clickable { onClick(name) }) {
+        Column(
+            modifier = Modifier
+                .size(53.dp)
+                .background(
+                    Color(0x3351BC7D),
+                    shape = RoundedCornerShape(15.dp)
+                ),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = imagePainter,
+                contentDescription = null, // Optional
+                modifier = Modifier.size(30.dp) // Adjust size if needed
+            )
+        }
 
-//    LaunchedEffect(key1 = product.id) {
-//        viewModel.getFirstImage(product.id, "0")
-//    }
+        Text(text = name, fontSize = 12.sp)
+    }
+}
+
+@Composable
+fun ProductCard(product: Product, onEditClick: () -> Unit, onCardClick: () -> Unit ){
+
 
     Box(modifier = Modifier
         .height((LocalConfiguration.current.screenHeightDp.dp) / 3f)
@@ -282,77 +327,66 @@ fun ProductCard(product: ProductResponseDtoItem, onEditClick: () -> Unit, onCard
         .clip(RoundedCornerShape(10.dp))
         .background(Color.White)
         .clickable {
-
-//            viewModel.selectedProduct.value = product
-            viewModel.getProduct(product.id)
             onCardClick()
         }) {
 
         Column(modifier = Modifier.fillMaxSize()){
-
-
-            AsyncImage(
-                model = product.imageURL ,
-                contentDescription = "Image loaded from URL",
+            Image(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(0.dp)
                     .fillMaxWidth()
-                    .fillMaxHeight(0.5f) // Adjust aspect ratio as needed
-                ,
-                onError = { error ->
-                    Log.d("CoilError", "Image failed to load: ${error.result.throwable}")
-                },
+                    .fillMaxHeight(0.5f),
+                painter = rememberAsyncImagePainter(model = product.imageUris[0]),
+                contentDescription = null, // or provide a meaningful description
                 contentScale = ContentScale.Crop,
                 alignment = Alignment.BottomCenter
+
             )
 
-            
             Spacer(modifier = Modifier.height(10.dp))
 
             Column(modifier = Modifier
                 .padding(start = 10.dp, end = 10.dp)
                 .fillMaxSize()) {
-                Text(text = product.name, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                Text(text = product.productName, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
                 Spacer(modifier = Modifier.height(10.dp))
-                
+
                 Row {
-                    Text(text =product.price.toString(), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF4CAD73))
+                    Text(text = product.pricePerUnit.toString(), fontSize = 14.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF4CAD73))
                     Text(text = "/ "+ product.unit, fontSize = 12.sp)
 
                 }
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Row(
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Available: ${product.quantity} ${product.unit}",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFFBDBDBD),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                Row {
+                    Text(text = "Available: ", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color(0xFFBDBDBD))
+                    Text(text = product.totalReserve.toString(),fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color(0xFFBDBDBD))
+                    Text(text = " " + product.unit.toString(),fontSize = 14.sp, fontWeight = FontWeight.Medium, color = Color(0xFFBDBDBD))
+
                 }
 
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.edit_icon) ,
-                    contentDescription = "Search",
-                    tint = Color(0xFF4CAD73),
-                    modifier = Modifier
-                        .align(Alignment.End)
-                        .clickable {
-//                            viewModel.getProduct(product.id)
-//                            onEditClick()
-                        },
+                Spacer(modifier = Modifier.height(20.dp))
 
+                Row (verticalAlignment = Alignment.CenterVertically){
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(product.farmerDetails.imageUri) // Replace with the actual image URI
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Farmer Image",
+                        modifier = Modifier
+                            .size(18.dp)
+                            .clip(CircleShape), // Makes the image round
+                        placeholder = painterResource(id = R.drawable.avatarimage), // Optional placeholder
+                        error = painterResource(id = R.drawable.avatarimage) // Optional error image
+                    )
+                    Text(text = product.farmerDetails.name,fontSize = 9.sp, color = Color.Black)
 
-                )
+                }
+
 
             }
-            
+
 
 
         }
@@ -361,37 +395,7 @@ fun ProductCard(product: ProductResponseDtoItem, onEditClick: () -> Unit, onCard
 
 
     }
-    
+
 
 
 }
-
-
-fun inputStreamToBitmap(inputStream: InputStream): Bitmap? {
-    return try {
-        BitmapFactory.decodeStream(inputStream)
-    } catch (e: Exception) {
-        e.printStackTrace()
-        print("exception")
-        null
-    }
-}
-
-
-
-
-//
-//@Preview
-//@Composable
-//fun ProductCardPreview(){
-//    ProductCard(product = Product(id = "sdbsksbcd", productName = "Fresh Carrot", category = "veegetables",
-//        description = "The carrot is a root vegetable, most commonly observed as orange in color, " +
-//                "though purple, black, red, white, and yellow cultivars exist, " +
-//                "all of which are domesticated forms of the wild carrot, " +
-//                "Daucus carota, native to Europe and Southwestern Asia.", unit = "kg", pricePerUnit = 15000, totalReserve = 500,
-//        imageUris = mutableListOf(Uri.parse("https://main-cdn.sbermegamarket.ru/big2/hlr-system/-34/440/660/684/197/100032801902b4.jpg"))
-//    ))
-//
-//
-//}
-

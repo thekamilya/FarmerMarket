@@ -1,24 +1,18 @@
-package com.example.farmermarket.presentation.screens.main_buyer
-
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,133 +21,158 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-//
-//enum class HomeScreens {
-//    LIBRARY,
-//    SEARCH,
-//    PROFILE,
-//
-//}
-//
-//
-//@Composable
-//fun NavigationItem(onClick: () -> Unit,thisRoute:String, selectedRoute:String, title: String,imageVector: ImageVector){
-//
-//    Box(modifier = Modifier
-//        .clickable(onClick = {onClick()}) ){
-//        Column(horizontalAlignment = Alignment.CenterHorizontally){
-//            Icon(imageVector = imageVector ,
-//                contentDescription = title,
-//                tint = if(thisRoute == selectedRoute) {
-//                    Color.White} else {
-//                    Color.Gray}
-//            )
-//            Spacer(modifier = Modifier.height(5.dp))
-//            Text(text = title, fontSize = 11.sp, fontFamily = FontFamily(Font(R.font.my_custom_font_medium)),
-//                color = if(thisRoute == selectedRoute) {
-//                    Color.White} else {
-//                    Color.Gray}
-//            )
-//        }
-//
-//    }
-//}
-//
-//@Composable
-//fun BottomBar(navController: NavHostController){
-//    Box(modifier = Modifier
-//        .background(
-//            brush = Brush.verticalGradient(
-//                listOf(Color.Transparent, Color.White),
-//                startY = 0.0f,
-//                endY = 100.0f,
-////                tileMode = TileMode.Clamp
-//            )
-//        )
-//        .padding(start = 10.dp,end = 10.dp, top = 50.dp, bottom = 10.dp)
-//        .clip(RoundedCornerShape(16.dp))){
-//        Row(modifier = Modifier
-//            .fillMaxWidth()
-//            .height(70.dp)
-//            .background(color = Color(0xFF444A51)),
-//            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.Absolute.SpaceEvenly,
-//        ) {
-//            var selectedRoute by remember { mutableStateOf(HomeScreens.LIBRARY.name) }
-//
-//            NavigationItem(onClick = {
-//                navController.navigate(HomeScreens.LIBRARY.name)
-//                selectedRoute = HomeScreens.LIBRARY.name
-//            }, thisRoute = HomeScreens.LIBRARY.name,
-//                selectedRoute = selectedRoute,
-//                title = "Library", imageVector = ImageVector.vectorResource(R.drawable.library) )
-//
-//            NavigationItem(onClick = {
-//                navController.navigate(HomeScreens.SEARCH.name)
-//                selectedRoute = HomeScreens.SEARCH.name
-//            },selectedRoute = selectedRoute,
-//                thisRoute = HomeScreens.SEARCH.name, title = "Discover", imageVector = ImageVector.vectorResource(R.drawable.search) )
-//
-//            NavigationItem(onClick = {
-//                navController.navigate(HomeScreens.PROFILE.name)
-//                selectedRoute = HomeScreens.PROFILE.name
-//            },selectedRoute = selectedRoute,
-//                thisRoute = HomeScreens.PROFILE.name ,title = "Profile", imageVector = ImageVector.vectorResource(R.drawable.profile) )
-//
-//        }
-//    }
-//
-//
-//}
-//
-//@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-//@Composable
-//fun HomeScreen(rootNavController: NavHostController) {
-//    val homeNavController = rememberNavController()
-//    var selectedRoute by remember { mutableStateOf(HomeScreens.LIBRARY) }
-//
-//
-//    Surface(
-//        modifier = Modifier.fillMaxSize(),
-//    ) {
-//        Scaffold(
-//            bottomBar = { BottomBar(homeNavController) }
-//        ) {
-//            NavHost(
-//                navController = homeNavController,
-//                startDestination = HomeScreens.LIBRARY.name,
-//                enterTransition = {
-//                    EnterTransition.None
-//                },
-//                exitTransition = {
-//                    ExitTransition.None
-//                },
-//            ) {
-//                composable(route = HomeScreens.LIBRARY.name) {
-//                    LibraryNavScreen()
-//                }
-//                composable(route = HomeScreens.SEARCH.name) {
-//                    DiscoverNavScreen()
-//                }
-//                composable(route = HomeScreens.PROFILE.name) {
-//
-//                    ProfileNavScreen(onLogOut = {
-//                        rootNavController.navigate(route = MainScreens.AUTH.name)
-//
-//                    })
-//                }
-//
-//            }
-//        }
-//    }
-//}
+import com.example.farmermarket.R
+import com.example.farmermarket.presentation.screens.main_buyer.BuyerViewModel
+import com.example.farmermarket.presentation.screens.main_buyer.ChatsScreen
+import com.example.farmermarket.presentation.screens.main_buyer.MarketScreen
+import com.example.farmermarket.presentation.screens.main_buyer.OrdersScreen
+import com.example.farmermarket.presentation.screens.main_buyer.ProductDetailsScreen
+import com.example.farmermarket.presentation.screens.main_buyer.ProfileScreen
+import com.example.farmermarket.presentation.screens.main_farmer.NavigationItem
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+
+
+enum class BuyerScreens {
+    MARKET,
+    ORDERS,
+    CHATS,
+    CHAT,
+    PROFILE,
+    PRODUCT_DETAILS
+}
+
+@Composable
+fun BottomBar(navController: NavHostController, selectedRoute: String, onSelectedChange:(String) -> Unit ){
+    Box(modifier = Modifier
+        .shadow(
+            elevation = 16.dp,
+            shape = RoundedCornerShape(topEnd = 34.dp, topStart = 34.dp), clip = true
+        )
+        .background(Color.White)
+        .clip(RoundedCornerShape(topEnd = 34.dp, topStart = 34.dp))){
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .height(70.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Absolute.SpaceEvenly,
+        ) {
+
+            NavigationItem(onClick = {
+                navController.navigate(BuyerScreens.MARKET.name)
+                onSelectedChange(BuyerScreens.MARKET.name)
+            }, thisRoute = BuyerScreens.MARKET.name,
+                selectedRoute = selectedRoute,
+                title = "Market", imageVector = ImageVector.vectorResource(id = R.drawable.market_nav) )
+
+            NavigationItem(onClick = {
+                navController.navigate(BuyerScreens.ORDERS.name)
+                onSelectedChange(BuyerScreens.ORDERS.name)
+            },selectedRoute = selectedRoute,
+                thisRoute = BuyerScreens.ORDERS.name,
+                title = "Orders", imageVector = ImageVector.vectorResource(R.drawable.order_nav) )
+
+            NavigationItem(onClick = {
+                navController.navigate(BuyerScreens.CHATS.name)
+                onSelectedChange(BuyerScreens.CHATS.name)
+            },selectedRoute = selectedRoute,
+                thisRoute = BuyerScreens.CHATS.name ,
+                title = "Chats", imageVector = ImageVector.vectorResource(R.drawable.chats_nav) )
+
+            NavigationItem(onClick = {
+                navController.navigate(BuyerScreens.PROFILE.name)
+                onSelectedChange(BuyerScreens.PROFILE.name)
+            },selectedRoute = selectedRoute,
+                thisRoute = BuyerScreens.PROFILE.name ,title = "Profile", imageVector = ImageVector.vectorResource(
+                    R.drawable.profile_nav) )
+
+        }
+    }
+
+
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
+fun BuyerNavigation(rootNavController: NavHostController) {
+    val buyerNavController = rememberNavController()
+
+    var selectedRoute by remember { mutableStateOf(BuyerScreens.MARKET.name) }
+    val currentBackStackEntry by buyerNavController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route
+    val systemUiController = rememberSystemUiController()
+    val viewModel: BuyerViewModel = hiltViewModel()
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color.Gray
+    ) {
+        Scaffold(
+            bottomBar = { if (
+                currentRoute == BuyerScreens.MARKET.name
+                || currentRoute == BuyerScreens.ORDERS.name
+                || currentRoute == BuyerScreens.CHATS.name
+                || currentRoute == BuyerScreens.PROFILE.name) {
+
+                BottomBar(buyerNavController, selectedRoute){selected->
+                    selectedRoute = selected
+
+                }
+            }}
+        ) {
+            NavHost(
+                navController = buyerNavController,
+                startDestination = BuyerScreens.MARKET.name,
+                enterTransition = {
+                    EnterTransition.None
+                },
+                exitTransition = {
+                    ExitTransition.None
+                },
+            ) {
+                composable(route = BuyerScreens.MARKET.name) {
+                    systemUiController.setStatusBarColor(
+                        color = Color(0xff4CAD73), // Replace with your desired color
+                    )
+                    MarketScreen( buyerNavController)
+                }
+                composable(route = BuyerScreens.ORDERS.name) {
+
+                    OrdersScreen( buyerNavController)
+                }
+                composable(route = BuyerScreens.CHATS.name) {
+
+                    ChatsScreen( buyerNavController, viewModel)
+                }
+                composable(route = BuyerScreens.CHAT.name) {
+
+//                    ChatScreen( buyerNavController, viewModel)
+                }
+
+                composable(route = BuyerScreens.PROFILE.name) {
+
+                    ProfileScreen( buyerNavController)
+                }
+
+                composable(route = BuyerScreens.PRODUCT_DETAILS.name){
+
+                    ProductDetailsScreen(buyerNavController)
+                }
+
+
+
+            }
+        }
+    }
+}

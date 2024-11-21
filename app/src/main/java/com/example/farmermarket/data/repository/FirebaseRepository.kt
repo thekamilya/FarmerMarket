@@ -16,6 +16,7 @@ class FirebaseRepository {
     val conversationsRef = database.getReference("conversations")
     val messagesRef = database.getReference("messages")
 
+
     // Step 2: Fetch conversations where the user is a participant
     fun fetchConversationsForUser(userId: String, onChatRoomsRetrieved: (List<Conversation>) -> Unit) {
         conversationsRef.orderByChild("participants/$userId").equalTo(true)
@@ -39,11 +40,12 @@ class FirebaseRepository {
 
                     // Return chat rooms
                     onChatRoomsRetrieved(conversations)
-                    Log.i("kama", "success 2")
+                    Log.d("LAB", conversations.toString())
                 }
 
                 override fun onCancelled(error: DatabaseError) {
                     // Handle error
+                    Log.d("LAB", error.toString())
                     throw DatabaseOperationException("Disconnected from Firebase server. Please try again later.")
                 }
             })
@@ -58,6 +60,7 @@ class FirebaseRepository {
                 override fun onDataChange(userSnapshot: DataSnapshot) {
                     val userId = userSnapshot.children.firstOrNull()?.key ?: return
                     fetchConversationsForUser(userId){chats->
+                        Log.d("LAB", chats.toString())
                         onConversationsRetrieved(chats)
 
                     }
@@ -65,9 +68,9 @@ class FirebaseRepository {
                 }
 
                 override fun onCancelled(error: DatabaseError) {
+                    Log.d("LAB", error.toString())
                     // Handle error
 //                    throw DatabaseOperationException("Disconnected from Firebase server. Please try again later.")
-                    Log.i("ERR", error.message)
                 }
             })
 

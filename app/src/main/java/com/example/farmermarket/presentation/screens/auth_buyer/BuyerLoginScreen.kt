@@ -1,5 +1,6 @@
 package com.example.farmermarket.presentation.screens.auth_buyer
 
+import BuyerScreens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -71,7 +72,7 @@ fun BuyerLoginScreen(navController: NavHostController){
                         modifier = Modifier
                         .padding(start = 24.dp, bottom = 16.dp) )
 
-                TextField(
+                OutlinedTextField(
 
                         shape = RoundedCornerShape(10.dp),
                         placeholder = { Text(text = "yourmail@mail.com", color = Color(0xFFBDBDBD))},
@@ -145,7 +146,9 @@ fun BuyerLoginScreen(navController: NavHostController){
                         .padding(start = 24.dp, end = 24.dp, bottom = 24.dp),
                         colors = ButtonDefaults.buttonColors( Color(0xFF4CAD73)),
                         shape = RoundedCornerShape(10.dp),
-                        onClick = {  }) {
+                        onClick = {
+                                navController.navigate(Screens.BUYER_NAVIGATION.name)
+                        }) {
                         Spacer(modifier = Modifier.height(35.dp))
                         Text(text = "Login", color = Color.White, fontSize = 18.sp)
                         Spacer(modifier = Modifier.height(35.dp))

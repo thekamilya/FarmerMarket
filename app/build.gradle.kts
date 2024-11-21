@@ -4,6 +4,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("kotlin-kapt")
     id("com.google.gms.google-services")
+
 }
 
 android {
@@ -102,4 +103,38 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.7.7")
     implementation ("androidx.compose.material:material-icons-extended:1.7.3")
+
+    implementation("io.coil-kt:coil-compose:2.4.0")
+
+    //ktor
+
+    implementation ("io.ktor:ktor-client-core:2.3.2")
+    implementation ("io.ktor:ktor-client-cio:2.3.2") // or another engine like OkHttp
+    implementation ("io.ktor:ktor-client-websockets:2.3.2")
+
+    implementation ("com.google.accompanist:accompanist-systemuicontroller:0.30.1")
+
+    // Ktor Client dependencies
+    implementation("io.ktor:ktor-client-core:2.3.0")   // Core Ktor Client
+    implementation("io.ktor:ktor-client-websockets:2.3.0")  // WebSocket support
+    implementation("io.ktor:ktor-client-cio:2.3.0")  // CIO Engine for Ktor Client
+    implementation("io.ktor:ktor-client-json:2.3.0")  // JSON support for Ktor Client
+    implementation("io.ktor:ktor-client-serialization:2.3.0")  // Serialization support for Ktor Client
+
+    // OkHttp dependency (if you need OkHttp for other purposes)
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation ("io.reactivex.rxjava2:rxjava:2.2.21")  // or the version you prefer
+    implementation ("com.github.NaikSoftware:StompProtocolAndroid:1.6.6")
+
+    implementation("io.reactivex.rxjava2:rxandroid:2.1.1")
+    implementation("io.reactivex.rxjava2:rxjava:2.2.21")
+
+
+    implementation ("com.google.firebase:firebase-database:20.1.1")
+
+
+
+
 }
+
+

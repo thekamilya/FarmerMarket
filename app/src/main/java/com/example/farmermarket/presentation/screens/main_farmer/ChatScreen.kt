@@ -142,7 +142,7 @@ fun ChatScreen(navController: NavHostController, viewModel: FarmerViewModel){
 
                             // Call your send message function here
                             viewModel.sendMessage(viewModel.selectedChatId.value,message,
-                                Constants.userName
+                                Constants.uuid
                             )
                             message = ""
                         }
@@ -231,7 +231,7 @@ fun MessageElement(message: Message) {
         modifier = Modifier
             .padding(horizontal = 20.dp, vertical = 10.dp)
             .fillMaxWidth(),
-        horizontalAlignment = if (message.senderId == Constants.userName) Alignment.End else Alignment.Start
+        horizontalAlignment = if (message.senderId == Constants.uuid) Alignment.End else Alignment.Start
     ) {
         // Display date only once per day
 //        Text(
@@ -241,7 +241,7 @@ fun MessageElement(message: Message) {
 //            modifier = Modifier.padding(bottom = 4.dp)
 //        )
         Row(
-            horizontalArrangement = if (message.senderId == Constants.userName) Arrangement.End else Arrangement.Start,
+            horizontalArrangement = if (message.senderId == Constants.uuid) Arrangement.End else Arrangement.Start,
             modifier = Modifier.fillMaxWidth()
         ) {
             Column(
@@ -250,12 +250,12 @@ fun MessageElement(message: Message) {
                         RoundedCornerShape(
                             topStart = 16.dp,
                             topEnd = 16.dp,
-                            bottomStart = if (message.senderId == Constants.userName) 16.dp else 4.dp,
-                            bottomEnd = if (message.senderId == Constants.userName) 4.dp else 16.dp
+                            bottomStart = if (message.senderId == Constants.uuid) 16.dp else 4.dp,
+                            bottomEnd = if (message.senderId == Constants.uuid) 4.dp else 16.dp
                         )
                     )
                     .background(
-                        color = if (message.senderId == Constants.userName) Color(0xff4CAD73) else Color(
+                        color = if (message.senderId == Constants.uuid) Color(0xff4CAD73) else Color(
                             0xffECEAEA
                         )
                     )
@@ -265,11 +265,11 @@ fun MessageElement(message: Message) {
                     modifier = Modifier
                         .padding(15.dp)
                         .widthIn(max = (0.7f * LocalConfiguration.current.screenWidthDp).dp),
-                    color = if (message.senderId == Constants.userName) Color.White else Color.Black
+                    color = if (message.senderId == Constants.uuid) Color.White else Color.Black
                 )
                 Text(
                     text = formattedTime,
-                    color = if (message.senderId == Constants.userName) Color.LightGray else Color.Gray,
+                    color = if (message.senderId == Constants.uuid) Color.LightGray else Color.Gray,
                     fontSize = 10.sp,
                     modifier = Modifier
                         .align(Alignment.End)

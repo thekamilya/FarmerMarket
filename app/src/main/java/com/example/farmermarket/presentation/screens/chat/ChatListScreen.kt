@@ -1,6 +1,7 @@
 package com.example.testproj.presentation.screens
 
 import android.os.Build
+import android.provider.SyncStateContract.Constants
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -35,6 +36,7 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.farmermarket.R
 import com.example.farmermarket.common.Constants.userName
+import com.example.farmermarket.common.Constants.uuid
 import com.example.farmermarket.data.remote.dto.Conversation
 import com.example.farmermarket.presentation.screens.main_farmer.FarmerViewModel
 
@@ -69,14 +71,14 @@ fun ChatListScreen( navController: NavHostController, viewModel: FarmerViewModel
     LazyColumn(modifier = Modifier.fillMaxHeight()){
 
         items(chatList){chat->
-            viewModel.selectedParticipantName.value = getParticipantName(
-                participants = chat.participants,
-                userName = "kamila"
-            )
+//            viewModel.selectedParticipantName.value = getParticipantName(
+//                participants = chat.participants,
+//                userName = "kamila"
+//            )
             ChatListItem(conversation = chat, userName = userName) {id->
                 viewModel.selectedChatId.value = id
 //                navController.navigate(Screens.CHAT.name)
-                viewModel.getChat(id)
+                viewModel.getChat(chat, uuid)
             }
         }
     }
@@ -117,12 +119,12 @@ fun ChatListItem(
             modifier = Modifier.weight(1f)
         ) {
             // Participants
-            Text(
-                text = "${getParticipantName(conversation.participants, userName)}",
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+//            Text(
+//                text = "${getParticipantName(conversation.participantsNames, userName)}",
+//                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+//                maxLines = 1,
+//                overflow = TextOverflow.Ellipsis
+//            )
 
             // Last message
             Text(

@@ -29,12 +29,4 @@ class GetChatsUseCase {
             )
         }
     }
-//    operator fun invoke(user: String, onChatRoomsRetrieved: (List<Conversation>) -> Unit){
-//        val repo = FirebaseRepository()
-//        repo.getChatsForUser(user) { chatRooms ->
-//
-//            onChatRoomsRetrieved(chatRooms)
-//        }
-//
-//    }
 }

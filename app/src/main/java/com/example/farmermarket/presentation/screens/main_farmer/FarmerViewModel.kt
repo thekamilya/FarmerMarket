@@ -6,28 +6,42 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.Lifecycle
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.farmermarket.common.Constants.BASE_URL
+import com.example.farmermarket.common.Constants.userName
 import com.example.farmermarket.common.Resource
 import com.example.farmermarket.data.remote.dto.Conversation
+import com.example.farmermarket.data.remote.dto.FarmerDashBoardDto
+import com.example.farmermarket.data.remote.dto.SoldProductsDto
+import com.example.farmermarket.data.remote.dto.SoldProductsDtoItem
 import com.example.farmermarket.data.remote.dto.Message
+import com.example.farmermarket.data.remote.dto.OffersListDtoItem
 import com.example.farmermarket.data.remote.dto.ProductDTO
 import com.example.farmermarket.data.remote.dto.ProductDetailDto
 import com.example.farmermarket.data.remote.dto.ProductResponseDto
+import com.example.farmermarket.domain.usecase.ChangeOfferStatusUseCase
+import com.example.farmermarket.domain.usecase.CreateNewChatUseCase
 import com.example.farmermarket.domain.usecase.DeleteProductUseCase
 import com.example.farmermarket.domain.usecase.GetChatUseCase
 import com.example.farmermarket.domain.usecase.GetChatsUseCase
+import com.example.farmermarket.domain.usecase.GetFarmerDashBoardUseCase
+import com.example.farmermarket.domain.usecase.GetFarmerOffersUseCase
 import com.example.farmermarket.domain.usecase.GetProductDetailUseCase
 import com.example.farmermarket.domain.usecase.GetProductsUseCase
 import com.example.farmermarket.domain.usecase.GetRealTimeMessagesUseCase
+import com.example.farmermarket.domain.usecase.GetSoldProductsUseCase
+import com.example.farmermarket.domain.usecase.GetUsernameByUserIdUseCase
+import com.example.farmermarket.domain.usecase.MarkAsReadUseCase
 import com.example.farmermarket.domain.usecase.SendMessageUseCase
+import com.example.farmermarket.domain.usecase.UpdateProductStatusUseCase
+import com.example.farmermarket.presentation.screens.main_buyer.OffersListState
 import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.ktor.client.utils.EmptyContent.headers
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
@@ -44,7 +58,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import ua.naiksoftware.stomp.Stomp
 import ua.naiksoftware.stomp.StompClient
 import ua.naiksoftware.stomp.dto.LifecycleEvent
-import ua.naiksoftware.stomp.dto.StompHeader
 import java.io.IOException
 import javax.inject.Inject
 
@@ -72,6 +85,45 @@ data class ProductAddState(
     var error: String = ""
 )
 
+data class OrderedProductListState(
+    var isLoading: Boolean? = null,
+    var orderedProductList:SoldProductsDto = SoldProductsDto(),
+    var error: String = ""
+)
+data class InTransitProductListState(
+    var isLoading: Boolean? = null,
+    var inTransitProductList:SoldProductsDto = SoldProductsDto(),
+    var error: String = ""
+)
+
+data class PackedProductListState(
+    var isLoading: Boolean? = null,
+    var packedProductList:SoldProductsDto = SoldProductsDto(),
+    var error: String = ""
+)
+data class CompletedProductListState(
+    var isLoading: Boolean? = null,
+    var completedProductList:SoldProductsDto = SoldProductsDto(),
+    var error: String = ""
+)
+data class CancelledProductListState(
+    var isLoading: Boolean? = null,
+    var cancelledProductList:SoldProductsDto = SoldProductsDto(),
+    var error: String = ""
+)
+
+data class UpdateProductStatusState(
+    var isLoading: Boolean? = null,
+    var isChanged:Boolean? = null,
+    var error: String = ""
+)
+
+data class ChangeOfferStatusState(
+    var isLoading: Boolean? = null,
+    var isChanged:Boolean? = null,
+    var error: String = ""
+)
+
 @HiltViewModel
 class FarmerViewModel  @Inject constructor(
 
@@ -83,7 +135,15 @@ class FarmerViewModel  @Inject constructor(
     private val getRealTimeMessagesUseCase: GetRealTimeMessagesUseCase,
     private val getProductsUseCase: GetProductsUseCase,
     private val deleteProductUseCase: DeleteProductUseCase,
-    private val getProductDetailUseCase: GetProductDetailUseCase
+    private val getProductDetailUseCase: GetProductDetailUseCase,
+    private val getSoldProductsUseCase: GetSoldProductsUseCase,
+    private val updateProductStatusUseCase: UpdateProductStatusUseCase,
+    private val createNewChatUseCase: CreateNewChatUseCase,
+    private val getFarmerOffersUseCase: GetFarmerOffersUseCase,
+    private val changeOfferStatusUseCase: ChangeOfferStatusUseCase,
+    private val getUsernameByUserIdUseCase: GetUsernameByUserIdUseCase,
+    private val markAsReadUseCase: MarkAsReadUseCase,
+    private val getFarmerDashBoardUseCase: GetFarmerDashBoardUseCase
 
 ): ViewModel() {
 
@@ -103,9 +163,202 @@ class FarmerViewModel  @Inject constructor(
         ProductDetailDto()
     )
 
-
+    val offerListState: MutableState<OffersListState> = mutableStateOf(
+        OffersListState()
+    )
     val productUpdateState: MutableState<ProductUpdateState> = mutableStateOf(ProductUpdateState())
     val productAddState: MutableState<ProductAddState> = mutableStateOf(ProductAddState())
+
+    val orderedProductListState: MutableState<OrderedProductListState> = mutableStateOf(OrderedProductListState())
+    val inTransitProductListState: MutableState<InTransitProductListState> = mutableStateOf(InTransitProductListState())
+    val packedProductListState: MutableState<PackedProductListState> = mutableStateOf(
+        PackedProductListState()
+    )
+    val completedProductListState: MutableState<CompletedProductListState> = mutableStateOf(CompletedProductListState())
+    val cancelledProductListState: MutableState<CancelledProductListState> = mutableStateOf(CancelledProductListState())
+
+    val selectedOrderDetail: MutableState<SoldProductsDtoItem> = mutableStateOf(
+        SoldProductsDtoItem()
+    )
+
+    val updateProductStatusState : MutableState<UpdateProductStatusState>  = mutableStateOf(
+        UpdateProductStatusState()
+    )
+
+    val changeOfferStatusState : MutableState<ChangeOfferStatusState>  = mutableStateOf(
+        ChangeOfferStatusState()
+    )
+
+    val selectedOffer: MutableState<OffersListDtoItem> = mutableStateOf(OffersListDtoItem())
+
+    val farmerDashBoard: MutableState<FarmerDashBoardDto> = mutableStateOf(FarmerDashBoardDto())
+
+    val showOrderScreen = mutableStateOf(OrdersScreens.OFFERS)
+
+    fun getFarmerDashBoard(){
+
+        getFarmerDashBoardUseCase().onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    farmerDashBoard.value = result.data!!
+                }
+
+                is Resource.Error -> {
+
+                }
+
+                is Resource.Loading -> {
+
+                }
+
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
+
+    }
+
+    fun createNewChat(participant: String,onSuccess:(Conversation)-> Unit){
+        createNewChatUseCase(participant, onSuccess)
+
+    }
+
+
+    fun changeOfferStatus(offerId: Int, accepted: Boolean){
+        changeOfferStatusUseCase(offerId, accepted).onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    changeOfferStatusState.value = changeOfferStatusState.value.copy(isChanged = true)
+                }
+
+                is Resource.Error -> {
+                    changeOfferStatusState.value = changeOfferStatusState.value.copy(error = "Something went wrong!")
+                }
+
+                is Resource.Loading -> {
+                    changeOfferStatusState.value = changeOfferStatusState.value.copy(isLoading = true)
+                }
+
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
+    }
+
+
+    fun getOffers(){
+        getFarmerOffersUseCase().onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    offerListState.value = result.data?.let { OffersListState(data = it) }!!
+                }
+
+                is Resource.Error -> {
+                    offerListState.value = OffersListState(
+                        error = result.message ?: "An unexpected error occured"
+                    )
+                }
+
+                is Resource.Loading -> {
+                    offerListState.value = OffersListState(
+                        isLoading = true
+                    )
+                }
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
+    }
+
+
+    fun updateProductStatus(status: String, productId: Int){
+        updateProductStatusUseCase(status, productId).onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    updateProductStatusState.value = updateProductStatusState.value.copy(isChanged = true)
+                }
+
+                is Resource.Error -> {
+                    updateProductStatusState.value = updateProductStatusState.value.copy(error = "Something went wrong!")
+                }
+
+                is Resource.Loading -> {
+                    updateProductStatusState.value = updateProductStatusState.value.copy(isLoading = true)
+                }
+
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
+    }
+
+
+    fun getSoldProducts(status: String){
+        getSoldProductsUseCase(status).onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    Log.d("kama", result.data.toString())
+                    if (status == "ORDERED"){
+                        orderedProductListState.value =
+                            result.data?.let { orderedProductListState.value.copy(orderedProductList = it, isLoading = false) }!!
+                    }else if(status == "IN TRANSIT"){
+                        inTransitProductListState.value =
+                            result.data?.let { inTransitProductListState.value.copy( inTransitProductList = it, isLoading = false) }!!
+                    }else if(status == "PACKED"){
+                        packedProductListState.value =
+                            result.data?.let { packedProductListState.value.copy( packedProductList = it, isLoading = false) }!!
+                    }else if (status == "COMPLETED"){
+                        completedProductListState.value =
+                            result.data?.let { completedProductListState.value.copy(completedProductList = it, isLoading = false) }!!
+
+                    }else if (status == "CANCELLED"){
+                        cancelledProductListState.value =
+                            result.data?.let { cancelledProductListState.value.copy(cancelledProductList = it, isLoading = false) }!!
+
+                    }
+                }
+
+                is Resource.Error -> {
+                    if (status == "ORDERED"){
+                        orderedProductListState.value =
+                            orderedProductListState.value.copy(error = "Something went wrong",isLoading = false)
+                    }else if (status == "IN TRANSIT"){
+                        inTransitProductListState.value =
+                            inTransitProductListState.value.copy(error = "Something went wrong",isLoading = false)
+                    }else if (status == "PACKED"){
+                        packedProductListState.value =
+                            packedProductListState.value.copy(error = "Something went wrong",isLoading = false)
+                    } else if (status == "COMPLETED"){
+                        completedProductListState.value =
+                            completedProductListState.value.copy(error = "Something went wrong",isLoading = false)
+                    }else if (status == "CANCELLED"){
+                        cancelledProductListState.value =
+                            cancelledProductListState.value.copy(error = "Something went wrong",isLoading = false)
+
+                    }
+
+                }
+                is Resource.Loading -> {
+                    if (status == "ORDERED"){
+                        orderedProductListState.value =
+                            orderedProductListState.value.copy(isLoading = true)
+                    }else if (status == "IN TRANSIT"){
+                        inTransitProductListState.value =
+                            inTransitProductListState.value.copy(isLoading = true)
+                    }else if (status == "PACKED"){
+                        packedProductListState.value =
+                            packedProductListState.value.copy(isLoading = true)
+                    }else if (status == "COMPLETED"){
+                        completedProductListState.value =
+                            completedProductListState.value.copy(isLoading = true)
+
+                    }else if (status == "CANCELLED"){
+                        cancelledProductListState.value =
+                            cancelledProductListState.value.copy(isLoading = true)
+                    }
+
+                }
+
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
+    }
 
 
     fun getProduct(id: Int) {
@@ -179,9 +432,10 @@ class FarmerViewModel  @Inject constructor(
                             } else {
                                 Log.d("kama", "Request Fail: ${response.body?.string()}")
                                 productUpdateState.value =
-                                    productUpdateState.value.copy(error = "Something went wrong! Try again later")
+                                    response.body?.string()
+                                        ?.let { it1 -> productUpdateState.value.copy(error = it1) }!!
                                 productUpdateState.value =
-                                    productUpdateState.value.copy(updated = false)
+                                    productUpdateState.value.copy(updated = null)
                             }
                         }
                     }
@@ -368,12 +622,23 @@ class FarmerViewModel  @Inject constructor(
 
     }
 
-    fun getChat(conversationId: String) {
 
-        getChatUseCase(conversationId) { messages ->
+    fun getChat(conversation: Conversation, userId: String) {
+
+        selectedParticipantName.value = getParticipantName(conversation.participants, userId)
+        getChatUseCase(conversation.id) { messages ->
             messageList.value = messages
             Log.i("MESSAGE", messages.toString())
         }
+    }
+
+    fun markAsRead(conversationId: String) {
+        markAsReadUseCase(conversationId)
+    }
+
+    fun getUserName(userId:String, onSuccess: (String) -> Unit) {
+
+        getUsernameByUserIdUseCase(userId, onSuccess)
     }
 
     fun sendMessage(conversationId: String, message: String, userName: String) {

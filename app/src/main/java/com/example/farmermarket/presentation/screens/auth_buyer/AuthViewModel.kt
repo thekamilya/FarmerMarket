@@ -6,12 +6,14 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.farmermarket.common.Constants
 import com.example.farmermarket.common.Resource
 import com.example.farmermarket.data.remote.dto.LoginDto
 import com.example.farmermarket.data.remote.dto.SignupDto
+import com.example.farmermarket.domain.usecase.AddUserToFirebaseUseCase
+import com.example.farmermarket.domain.usecase.GetCurrentUserUseCase
 import com.example.farmermarket.domain.usecase.LoginUseCase
 import com.example.farmermarket.domain.usecase.SignUpUseCase
-import com.example.farmermarket.presentation.screens.main_farmer.ProductUpdateState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -31,7 +33,9 @@ class AuthViewModel @Inject constructor(
 
     private val signUpUseCase: SignUpUseCase,
     private val loginUseCase: LoginUseCase,
-    private val sharedPreferences: SharedPreferences
+    private val sharedPreferences: SharedPreferences,
+    private val getCurrentUserUseCase: GetCurrentUserUseCase,
+    private val addUserToFirebaseUseCase: AddUserToFirebaseUseCase
 
 ): ViewModel() {
 
@@ -79,6 +83,7 @@ class AuthViewModel @Inject constructor(
                         onSuccess()
                         Log.i("KAMA", result.data.access_token)
                         saveToPreferences("token", result.data.access_token)
+                        getCurrUser()
                     }else{
                         onFailure()
                     }
@@ -98,6 +103,40 @@ class AuthViewModel @Inject constructor(
         }.launchIn(viewModelScope)
     }
 
+    fun getCurrUser(){
+        getCurrentUserUseCase().onEach { result ->
+            when (result) {
+                is Resource.Success -> {
+                    result.data?.let { addUserToFirebaseUseCase(it.uuid, result.data.first_name + " "+ result.data.last_name) }
+                    if (result.data != null){
+                        saveToPreferences("uuid", result.data.uuid)
+                        Constants.uuid = result.data.uuid
+                        Constants.userName = result.data.first_name
+                        Constants.phone = result.data.phone
+                        Constants.email = result.data.email
+                        Constants.surname = result.data.last_name
+                    }else{
+                        saveToPreferences("uuid", "default")
+                    }
+
+                    result.data?.let { Log.i("KAMA", it.uuid) }
+
+                }
+
+                is Resource.Error -> {
+
+                }
+
+                is Resource.Loading -> {
+
+                }
+
+                else -> {}
+            }
+        }.launchIn(viewModelScope)
+    }
+
+
     fun saveToPreferences(key: String, value: String) {
         sharedPreferences.edit().putString(key, value).apply()
     }
@@ -105,6 +144,11 @@ class AuthViewModel @Inject constructor(
     fun getFromPreferences(key: String): String? {
         sharedPreferences.getString(key, "")?.let { Log.i("KAMA", it) }
         return sharedPreferences.getString(key, "")
+    }
+
+    fun addUserToFireBase(userId: String, userName: String){
+
+        addUserToFirebaseUseCase(userId, userName)
     }
 
 

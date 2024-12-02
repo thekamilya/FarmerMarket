@@ -62,7 +62,6 @@ fun MarketScreen( navController: NavController, viewModel: FarmerViewModel){
     LaunchedEffect(Unit) {
         viewModel.getProducts()
     }
-
     val productState = viewModel.productListState.value
     val productList = viewModel.productListState.value.productResponse
 

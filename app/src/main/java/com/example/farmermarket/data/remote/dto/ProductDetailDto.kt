@@ -3,7 +3,7 @@ package com.example.farmermarket.data.remote.dto
 data class ProductDetailDto(
     val category: String = "",
     val description: String = "",
-    val farmId: Int = 0,
+    val farmId: String = "",
     val id: Int = 0,
     val imageUrls: List<String?> = emptyList(),
     val name: String = "",

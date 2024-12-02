@@ -1,6 +1,7 @@
 package com.example.farmermarket.domain.repository
 
 
+import com.example.farmermarket.data.remote.dto.CurrentUserDto
 import com.example.farmermarket.data.remote.dto.LoginDto
 import com.example.farmermarket.data.remote.dto.LoginResponseDto
 import com.example.farmermarket.data.remote.dto.SignupDto
@@ -13,4 +14,6 @@ interface AuthRepository {
     suspend fun signUp(signupDto: SignupDto):  Response<ResponseBody>
 
     suspend fun logIn(loginDto: LoginDto):  LoginResponseDto
+
+    suspend fun getCurrUser(): CurrentUserDto
 }

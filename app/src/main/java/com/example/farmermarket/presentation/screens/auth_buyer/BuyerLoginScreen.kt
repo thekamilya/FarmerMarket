@@ -1,6 +1,7 @@
 package com.example.farmermarket.presentation.screens.auth_buyer
 
 import BuyerScreens
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,7 +14,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -37,6 +40,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -46,17 +50,22 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.farmermarket.R
 import com.example.farmermarket.Screens
+import com.example.farmermarket.data.remote.dto.LoginDto
+import com.example.farmermarket.presentation.screens.auth_farmer.Field
 
 @Composable
-fun BuyerLoginScreen(navController: NavHostController){
+fun BuyerLoginScreen(navController: NavHostController,authViewModel: AuthViewModel,){
 
-
-        var loginValue by remember { mutableStateOf("") }
-        var passwordValue by remember { mutableStateOf("") }
+        var emailValue by remember { mutableStateOf("buyer@gmail.ru") }
+        var phoneNumberValue by remember { mutableStateOf("+77000000000") }
+        var passwordValue by remember { mutableStateOf("Asdf123.") }
         val focusRequester = remember { FocusRequester() }
         var passwordVisibility by remember { mutableStateOf(false) }
+        val context = LocalContext.current
+        val scrollState = rememberScrollState()
 
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState),) {
+
 
                 Image(
                         modifier = Modifier
@@ -68,33 +77,12 @@ fun BuyerLoginScreen(navController: NavHostController){
                         alignment = Alignment.BottomCenter
 
                 )
-                Text(text = "Email", fontWeight = FontWeight.Medium,
-                        modifier = Modifier
-                        .padding(start = 24.dp, bottom = 16.dp) )
 
-                OutlinedTextField(
+                Field(textName = "Email", hint = "Your email", focusRequester = focusRequester, onValueChange ={emailValue=it} , value = emailValue)
+                Field(textName = "Phone Number", hint = "87777777777", focusRequester = focusRequester, onValueChange = {phoneNumberValue = it},isNumber = true, value = phoneNumberValue )
 
-                        shape = RoundedCornerShape(10.dp),
-                        placeholder = { Text(text = "yourmail@mail.com", color = Color(0xFFBDBDBD))},
-                        maxLines = 1,
-                        colors = TextFieldDefaults.colors(
-                                focusedLabelColor = Color.DarkGray,
-                                focusedContainerColor = Color(0xFFF2F2F2),
-                                unfocusedContainerColor = Color(0xFFF2F2F2),
-                                disabledContainerColor = Color(0xFFF2F2F2),
-                                cursorColor = Color.Black,
-                                focusedIndicatorColor = Color(0xFFF2F2F2),
-                                unfocusedIndicatorColor = Color(0xFFF2F2F2),
-                        ),
-                        modifier = Modifier
-                                .fillMaxWidth()
-                                .background(Color.Transparent)
-                                .padding(start = 24.dp, end = 24.dp, bottom = 16.dp)
-                                .focusRequester(focusRequester)
-                        ,
-                        value = loginValue,
-                        onValueChange = { loginValue = it }
-                )
+
+
                 Text(text = "Password", fontWeight = FontWeight.Medium,
                         modifier = Modifier
                                 .padding(start = 24.dp, bottom = 16.dp) )
@@ -103,7 +91,7 @@ fun BuyerLoginScreen(navController: NavHostController){
                 OutlinedTextField(
 
                         shape = RoundedCornerShape(10.dp),
-                        placeholder = { Text(text = "yourpassword", color = Color(0xFFBDBDBD))},
+                        placeholder = { Text(text = "yourpassword", color = Color(0xFFBDBDBD)) },
                         maxLines = 1,
                         colors = TextFieldDefaults.colors(
                                 focusedLabelColor = Color.DarkGray,
@@ -147,7 +135,29 @@ fun BuyerLoginScreen(navController: NavHostController){
                         colors = ButtonDefaults.buttonColors( Color(0xFF4CAD73)),
                         shape = RoundedCornerShape(10.dp),
                         onClick = {
-                                navController.navigate(Screens.BUYER_NAVIGATION.name)
+
+                                if (emailValue.isEmpty() || phoneNumberValue.isEmpty() || passwordValue.isEmpty()) {
+
+                                        Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+
+                                }else{
+
+                                        val loginDto = LoginDto(
+                                                password = passwordValue,
+                                                phone = phoneNumberValue,
+                                                email = emailValue,
+                                        )
+                                        authViewModel.login(loginDto, onSuccess = {
+
+                                                navController.navigate(Screens.BUYER_NAVIGATION.name)
+
+
+                                        }, onFailure = {
+
+                                                Toast.makeText(context, "Incorrect credentials", Toast.LENGTH_SHORT).show()
+                                        })
+                                }
+
                         }) {
                         Spacer(modifier = Modifier.height(35.dp))
                         Text(text = "Login", color = Color.White, fontSize = 18.sp)
@@ -158,12 +168,14 @@ fun BuyerLoginScreen(navController: NavHostController){
                         Text(text = "Do not have an account? ", color = Color(0xFF0EB177))
                         Text(text = "Register",
                                 modifier = Modifier.clickable {
-                                    navController.navigate(Screens.BUYER_REGISTRATION.name)
+                                        navController.navigate(Screens.BUYER_REGISTRATION.name)
                                 },
                                 color = Color(0xFF0EB177),
                                 fontWeight = FontWeight.Bold)
 
                 }
+
+                Spacer(modifier = Modifier.height(35.dp))
 
         }
 

@@ -57,9 +57,9 @@ import com.example.farmermarket.presentation.screens.auth_buyer.AuthViewModel
 fun FarmerLoginScreen(navController: NavHostController, authViewModel: AuthViewModel, ){
 
 
-    var emailValue by remember { mutableStateOf("") }
-    var phoneNumberValue by remember { mutableStateOf("+7") }
-    var passwordValue by remember { mutableStateOf("") }
+    var emailValue by remember { mutableStateOf("farmer@gmail.ru") }
+    var phoneNumberValue by remember { mutableStateOf("+77000000000") }
+    var passwordValue by remember { mutableStateOf("Asdf123.") }
     val focusRequester = remember { FocusRequester() }
     var passwordVisibility by remember { mutableStateOf(false) }
     val context = LocalContext.current

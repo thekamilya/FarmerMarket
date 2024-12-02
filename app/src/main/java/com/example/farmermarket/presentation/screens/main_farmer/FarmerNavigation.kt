@@ -41,6 +41,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.farmermarket.R
+import com.example.farmermarket.Screens
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 enum class FarmerScreens {
@@ -51,7 +52,9 @@ enum class FarmerScreens {
     PROFILE,
     PRODUCT_DETAILS,
     EDIT_PRODUCT,
-    ADD_PRODUCT
+    ADD_PRODUCT,
+    ORDER_DETAILS,
+    OFFER_DETAILS
 
 }
 
@@ -170,7 +173,7 @@ fun FarmerNavigation(rootNavController: NavHostController , context: Context) {
 
             NavHost(
                 navController = farmerNavController,
-                startDestination = FarmerScreens.MARKET.name,
+                startDestination = FarmerScreens.PROFILE.name,
                 enterTransition = {
                     EnterTransition.None
                 },
@@ -186,7 +189,7 @@ fun FarmerNavigation(rootNavController: NavHostController , context: Context) {
                     )
                 }
                 composable(route = FarmerScreens.ORDERS.name) {
-                    OrdersScreen( farmerNavController)
+                    OrdersScreen( farmerNavController, viewModel)
 
                     systemUiController.setStatusBarColor(
                         color = Color.White, // Replace with your desired color
@@ -214,11 +217,12 @@ fun FarmerNavigation(rootNavController: NavHostController , context: Context) {
 
                 composable(route = FarmerScreens.PROFILE.name) {
 
-                    ProfileScreen( farmerNavController)
+                    ProfileScreen( farmerNavController,viewModel){
+                        rootNavController.navigate(Screens.START_SCREEN.name)
+                    }
 
                     systemUiController.setStatusBarColor(
-                        color = Color.Transparent, // Replace with your desired color
-                        darkIcons = useDarkIcons
+                        color = Color(0xff4CAD73), // Replace with your desired color
                     )
                 }
 
@@ -247,6 +251,24 @@ fun FarmerNavigation(rootNavController: NavHostController , context: Context) {
 
                     systemUiController.setStatusBarColor(
                         color = Color.Transparent, // Replace with your desired color
+                        darkIcons = useDarkIcons
+                    )
+                }
+                composable(route = FarmerScreens.ORDER_DETAILS.name){
+
+                    OrderDetailsScreen(farmerNavController, viewModel)
+
+                    systemUiController.setStatusBarColor(
+                        color = Color(0xff4CAD73), // Replace with your desired color
+                        darkIcons = useDarkIcons
+                    )
+                }
+                composable(route = FarmerScreens.OFFER_DETAILS.name){
+
+                    OfferDetailsScreen(farmerNavController, viewModel)
+
+                    systemUiController.setStatusBarColor(
+                        color = Color(0xff4CAD73), // Replace with your desired color
                         darkIcons = useDarkIcons
                     )
                 }

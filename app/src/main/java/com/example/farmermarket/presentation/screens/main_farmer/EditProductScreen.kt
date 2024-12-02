@@ -227,7 +227,7 @@ fun EditProductScreen(navController: NavController, viewModel: FarmerViewModel){
                         category = category,
                         description = description,
                         name = productName,
-                        price =  0.0,
+                        price =  price,
                         quantity = totalReserve.toString(),
                         unit = unit,
                         imageUrl = Url()

@@ -13,9 +13,15 @@ import com.example.farmermarket.data.repository.FirebaseRepository
 import com.example.farmermarket.data.repository.WebSocketServiceImpl
 import com.example.farmermarket.domain.repository.AuthRepository
 import com.example.farmermarket.domain.repository.FarmRepository
+import com.example.farmermarket.domain.usecase.AddToCartUseCase
+import com.example.farmermarket.domain.usecase.AddUserToFirebaseUseCase
+import com.example.farmermarket.domain.usecase.CreateNewChatUseCase
+import com.example.farmermarket.domain.usecase.GetCartUseCase
 import com.example.farmermarket.domain.usecase.GetChatUseCase
 import com.example.farmermarket.domain.usecase.GetChatsUseCase
 import com.example.farmermarket.domain.usecase.GetRealTimeMessagesUseCase
+import com.example.farmermarket.domain.usecase.GetUsernameByUserIdUseCase
+import com.example.farmermarket.domain.usecase.MarkAsReadUseCase
 import com.example.farmermarket.domain.usecase.SendMessageUseCase
 import dagger.Module
 import dagger.Provides
@@ -67,15 +73,14 @@ fun provideFarmApi(): FarmApi {
 
     @Provides
     @Singleton
-    fun provideAuthRepository(api: AuthApi): AuthRepository {
-        return AuthRepositoryImpl(api)
+    fun provideAuthRepository(api: AuthApi, sharedPrefs: SharedPreferences): AuthRepository {
+        return AuthRepositoryImpl(api,sharedPrefs)
     }
-//
 
-//    @Provides
-//    fun provideGetProductsUseCase(): GetProductsUseCase {
-//        return GetProductsUseCase()
-//    }
+    @Provides
+    fun provideGetUsernameByUserIdUseCase(): GetUsernameByUserIdUseCase {
+        return GetUsernameByUserIdUseCase()
+    }
 
     @Provides
     fun provideGetChatsUseCase(): GetChatsUseCase {
@@ -89,6 +94,36 @@ fun provideFarmApi(): FarmApi {
     @Provides
     fun provideSendMessageUseCase(): SendMessageUseCase {
         return SendMessageUseCase()
+
+    }
+
+    @Provides
+    fun provideMarkAsUseCase(): MarkAsReadUseCase {
+        return MarkAsReadUseCase()
+
+    }
+
+    @Provides
+    fun provideAddToCarUseCase(): AddToCartUseCase {
+        return AddToCartUseCase()
+
+    }
+
+    @Provides
+    fun provideAddUserToFirebaseUseCase(): AddUserToFirebaseUseCase {
+        return AddUserToFirebaseUseCase()
+
+    }
+
+    @Provides
+    fun provideGetCartUseCase(): GetCartUseCase {
+        return GetCartUseCase()
+
+    }
+
+    @Provides
+    fun provideCreateNewChatUseCase(): CreateNewChatUseCase {
+        return CreateNewChatUseCase()
     }
 
     @Provides

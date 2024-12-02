@@ -1,3 +1,6 @@
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -35,27 +38,39 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.farmermarket.R
+import com.example.farmermarket.common.Constants
 import com.example.farmermarket.common.Constants.userName
 import com.example.farmermarket.data.remote.dto.Message
+import com.example.farmermarket.presentation.screens.main_buyer.BuyerViewModel
 import com.example.farmermarket.presentation.screens.main_farmer.FarmerViewModel
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(navController: NavHostController, viewModel: FarmerViewModel){
+fun ChatScreen(navController: NavHostController, viewModel: BuyerViewModel){
 
 
-    Column {
-        
-        ChatHeader(viewModel.selectedParticipantName.value)
+    Column(modifier = Modifier.background(Color(0xFFF4F4F4))) {
+
+        com.example.farmermarket.presentation.screens.main_farmer.ChatHeader(
+            viewModel.selectedParticipantName.value,
+            onBackClicked = { navController.popBackStack() })
         val messagesList = viewModel.messageList
+        Log.i("MESSAGE1", viewModel.messageList.toString())
 
         val listState = rememberLazyListState()
         val coroutineScope = rememberCoroutineScope()
@@ -68,11 +83,29 @@ fun ChatScreen(navController: NavHostController, viewModel: FarmerViewModel){
                 }
             }
         }
-
-        LazyColumn(state = listState, modifier = Modifier.fillMaxHeight(0.9F)){
+        var date = " "
+        LazyColumn(state = listState,
+            modifier = Modifier
+                .fillMaxHeight(0.9F)){
             items(messagesList.value){message->
 
-                MessageElement(message = message)
+                val formatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                    .withZone(ZoneId.of("UTC"))
+
+                if (date != formatter2.format(Instant.ofEpochSecond(message.timestamp))){
+                    date = formatter2.format(Instant.ofEpochSecond(message.timestamp))
+
+                    Text(text = date,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 10.dp),
+                        textAlign = TextAlign.Center,
+                        color = Color.Gray,
+                        fontSize = 12.sp,)
+                }
+
+
+                com.example.farmermarket.presentation.screens.main_farmer.MessageElement(message = message)
             }
         }
         var message by remember { mutableStateOf("") }  // State to hold the message text
@@ -80,18 +113,20 @@ fun ChatScreen(navController: NavHostController, viewModel: FarmerViewModel){
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+//                .padding(20.dp)
+                .background(Color.White),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Input field for typing message
-            Row {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 TextField(
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.White,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,),
                     shape = RoundedCornerShape(16.dp),
                     value = message,
-                    colors = TextFieldDefaults.textFieldColors(
-                        focusedIndicatorColor = Color.Transparent,  // Remove underline when focused
-                        unfocusedIndicatorColor = Color.Transparent  // Remove underline when unfocused
-                    ),
+
                     onValueChange = { message = it },  // Update the message state
                     modifier = Modifier
                         .weight(1f)
@@ -107,14 +142,17 @@ fun ChatScreen(navController: NavHostController, viewModel: FarmerViewModel){
                         if (message.isNotEmpty()) {
 
                             // Call your send message function here
-                            viewModel.sendMessage(viewModel.selectedChatId.value,message, userName )
+                            viewModel.sendMessage(viewModel.selectedChatId.value,message,
+                                Constants.uuid
+                            )
                             message = ""
                         }
                     },
                     enabled = message.isNotEmpty()  // Disable the button when message is empty
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Send,  // You can replace this with your own icon
+                        imageVector = ImageVector.vectorResource(id = R.drawable.send_icon),
+                        tint = Color(0xff4CAD73),// You can replace this with your own icon
                         contentDescription = "Send Message"
                     )
 
@@ -124,7 +162,7 @@ fun ChatScreen(navController: NavHostController, viewModel: FarmerViewModel){
         }
     }
 
-    
+
 }
 
 @Composable

@@ -5,7 +5,8 @@ import retrofit2.http.Url
 data class ProductResponseDtoItem(
     val category: String = "",
     val description: String = "",
-    val farmId: Any = "",
+    val farmId: String? = "",
+    val farmName: String? = "",
     val id: Int = 0,
     val name: String = "",
     val price: Double = 0.0,

@@ -25,9 +25,9 @@ class LoginUseCase @Inject constructor(
             Log.d("kama", response.toString())
         } catch (e: HttpException) {
             emit(Resource.Error(e.localizedMessage ?: "An unexpected error occured"))
-            Log.d("kama", e.message.toString())
+            Log.d("kama", "An unexpected error occured"+ e.message.toString())
         } catch (e: IOException) {
-            Log.d("kama", e.message.toString())
+            Log.d("kama", "An unexpected error occuredd"+ e.message.toString())
             emit(Resource.Error(e.message.toString()))
         }
     }

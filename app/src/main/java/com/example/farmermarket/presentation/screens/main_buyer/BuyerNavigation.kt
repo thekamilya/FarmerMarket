@@ -33,9 +33,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.farmermarket.R
+import com.example.farmermarket.Screens
 import com.example.farmermarket.presentation.screens.main_buyer.BuyerViewModel
+import com.example.farmermarket.presentation.screens.main_buyer.CartScreen
 import com.example.farmermarket.presentation.screens.main_buyer.ChatsScreen
 import com.example.farmermarket.presentation.screens.main_buyer.MarketScreen
+import com.example.farmermarket.presentation.screens.main_buyer.NotificationScreen
+import com.example.farmermarket.presentation.screens.main_buyer.OfferDetailsScreen
+import com.example.farmermarket.presentation.screens.main_buyer.OrderDetailsScreen
 import com.example.farmermarket.presentation.screens.main_buyer.OrdersScreen
 import com.example.farmermarket.presentation.screens.main_buyer.ProductDetailsScreen
 import com.example.farmermarket.presentation.screens.main_buyer.ProfileScreen
@@ -46,10 +51,14 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 enum class BuyerScreens {
     MARKET,
     ORDERS,
+    ORDER_DETAILS,
     CHATS,
     CHAT,
     PROFILE,
-    PRODUCT_DETAILS
+    PRODUCT_DETAILS,
+    CART,
+    NOTIFICATIONS,
+    OFFER_DETAILS
 }
 
 @Composable
@@ -145,11 +154,11 @@ fun BuyerNavigation(rootNavController: NavHostController) {
                     systemUiController.setStatusBarColor(
                         color = Color(0xff4CAD73), // Replace with your desired color
                     )
-                    MarketScreen( buyerNavController)
+                    MarketScreen( buyerNavController, viewModel)
                 }
                 composable(route = BuyerScreens.ORDERS.name) {
 
-                    OrdersScreen( buyerNavController)
+                    OrdersScreen( buyerNavController, viewModel)
                 }
                 composable(route = BuyerScreens.CHATS.name) {
 
@@ -157,18 +166,37 @@ fun BuyerNavigation(rootNavController: NavHostController) {
                 }
                 composable(route = BuyerScreens.CHAT.name) {
 
-//                    ChatScreen( buyerNavController, viewModel)
+                    ChatScreen( buyerNavController, viewModel)
                 }
 
                 composable(route = BuyerScreens.PROFILE.name) {
 
-                    ProfileScreen( buyerNavController)
+                    ProfileScreen( buyerNavController, viewModel){
+                        rootNavController.navigate(Screens.START_SCREEN.name)
+                    }
                 }
 
                 composable(route = BuyerScreens.PRODUCT_DETAILS.name){
 
-                    ProductDetailsScreen(buyerNavController)
+                    ProductDetailsScreen(buyerNavController, viewModel)
                 }
+                composable(route = BuyerScreens.ORDER_DETAILS.name){
+
+                    OrderDetailsScreen(buyerNavController, viewModel)
+                }
+                composable(route = BuyerScreens.OFFER_DETAILS.name){
+
+                    OfferDetailsScreen(buyerNavController, viewModel)
+                }
+                composable(route = BuyerScreens.CART.name){
+
+                    CartScreen(viewModel)
+                }
+                composable(route = BuyerScreens.NOTIFICATIONS.name){
+
+                    NotificationScreen()
+                }
+
 
 
 

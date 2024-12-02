@@ -88,11 +88,11 @@ class MainActivity : ComponentActivity() {
                 startDestination =
                 Screens.START_SCREEN.name
 //                if (authViewModel.getFromPreferences("token")?.isNotEmpty() == true) {
-//                    Screens.FARMER_NAVIGATION.name
+//                    Screens.BUYER_NAVIGATION.name
 //                }else{
 //                    Screens.START_SCREEN.name
 //                     }
-//
+
                 ,
 
                 enterTransition = {
@@ -116,13 +116,13 @@ class MainActivity : ComponentActivity() {
                     )
                 }
                 composable(route = Screens.BUYER_LOGIN.name) {
-                    BuyerLoginScreen(navController)
+                    BuyerLoginScreen(navController, authViewModel)
                     systemUiController.setStatusBarColor(
                         color = Color(0xff53B97C), // Replace with your desired color
                     )
                 }
                 composable(route = Screens.BUYER_REGISTRATION.name) {
-                    BuyerRegistrationScreen(navController)
+                    BuyerRegistrationScreen(navController, authViewModel)
                 }
                 composable(route = Screens.FARMER_REGISTRATION.name) {
                     FarmerRegistrationScreen(navController,authViewModel )
@@ -134,7 +134,7 @@ class MainActivity : ComponentActivity() {
                     SuccessScreen(navController)
                 }
                 composable(route = Screens.FARMER_NAVIGATION.name){
-                    FarmerNavigation(rootNavController = navController, context = applicationContext)
+                    FarmerNavigation(rootNavController = navController, context = applicationContext,)
                     navController.clearBackStack(Screens.FARMER_NAVIGATION.name)
 
                 }

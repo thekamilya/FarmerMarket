@@ -50,13 +50,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.farmermarket.R
+import com.example.farmermarket.Role
 import com.example.farmermarket.Screens
+import com.example.farmermarket.common.Constants
 import com.example.farmermarket.data.remote.dto.SignupDto
 import com.example.farmermarket.presentation.screens.auth_buyer.AuthViewModel
 
 @Composable
 fun FarmerRegistrationScreen (navController: NavController, authViewModel: AuthViewModel ) {
 
+    Constants.role = Role.FARMER.name
     var nameValue by remember { mutableStateOf("") }
     var surnameValue by remember { mutableStateOf("") }
     var middlnameValue by remember { mutableStateOf("") }

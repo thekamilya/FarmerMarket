@@ -1,6 +1,8 @@
 package com.example.farmermarket.presentation.screens.main_buyer
 
+import android.provider.SyncStateContract.Constants
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -37,6 +39,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -57,6 +60,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -71,6 +75,9 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.farmermarket.R
+import com.example.farmermarket.common.Constants.uuid
+import com.example.farmermarket.data.remote.dto.CreateOfferDto
+import com.example.farmermarket.data.remote.dto.CreateOrderDto
 import com.example.farmermarket.data.remote.dto.ProductDetailDto
 import com.example.farmermarket.presentation.screens.main_farmer.FarmerScreens
 import com.example.farmermarket.presentation.screens.main_farmer.Product
@@ -90,26 +97,30 @@ import org.json.JSONObject
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ProductDetailsScreen(navController: NavController){
+fun ProductDetailsScreen(navController: NavController, viewModel: BuyerViewModel){
 
 
 
 
 
-    val product = ProductDetailDto(
-        category = "Vegetables",
-        description = "Fresh organic carrots",
-        farmId = 101,
-        id = 1,
-        imageUrls = listOf(
-            "https://main-cdn.sbermegamarket.ru/big2/hlr-system/-34/440/660/684/197/100032801902b4.jpg",
-            "https://main-cdn.sbermegamarket.ru/big2/hlr-system/-34/440/660/684/197/100032801902b4.jpg"
-        ),
-        name = "Organic Carrot",
-        price = 1.99,
-        quantity = 10.0,
-        unit = "kg"
-    )
+//    val product = ProductDetailDto(
+//        category = "Vegetables",
+//        description = "Fresh organic carrots",
+//        farmId = 101,
+//        id = 1,
+//        imageUrls = listOf(
+//            "https://main-cdn.sbermegamarket.ru/big2/hlr-system/-34/440/660/684/197/100032801902b4.jpg",
+//            "https://main-cdn.sbermegamarket.ru/big2/hlr-system/-34/440/660/684/197/100032801902b4.jpg"
+//        ),
+//        name = "Organic Carrot",
+//        price = 1.99,
+//        quantity = 10.0,
+//        unit = "kg"
+//    )
+    val product = viewModel.selectedProduct.value
+//    viewModel.connectStomp(product.id, onDelete = {
+//        navController.popBackStack()
+//    })
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { product.imageUrls.size })
     val pageCount by remember { mutableStateOf(product.imageUrls.size) }
     val showDialog = remember{ mutableStateOf(false) }
@@ -119,8 +130,8 @@ fun ProductDetailsScreen(navController: NavController){
 
     Box(){
         if (showDialog.value) {
-            BlurredBackgroundDialog(onDismissRequest = { showDialog.value= false }) {
-                ProductActionWindow(actionName = actionName.value, product = product)
+            BlurredBackgroundDialog(viewModel, onDismissRequest = { showDialog.value= false }) {
+                ProductActionWindow(actionName = actionName.value, product = product, viewModel)
             }
         }
 
@@ -273,14 +284,18 @@ fun ProductDetailsScreen(navController: NavController){
                             contentDescription = "",
                             tint = Color(0xFFBCBEBC),
                             modifier = Modifier.clickable {
+                                viewModel.createNewChat(product.farmId.toString()) {
+                                    viewModel.selectedParticipantName.value = product.farmId.toString()
+                                    viewModel.getChat(it, uuid)
+                                    navController.navigate(FarmerScreens.CHAT.name)
+                                }
 
                             })
-
-
                     }
 
                     Spacer(modifier = Modifier.height(50.dp))
 
+                    val context = LocalContext.current
                     Row {
                         Button(
                             modifier = Modifier
@@ -288,8 +303,11 @@ fun ProductDetailsScreen(navController: NavController){
                                 .weight(1f)  // Set the weight to equally divide the space
                                 .fillMaxWidth(),
                             onClick = {
-                                actionName.value = "Add to cart"
-                                showDialog.value = true
+                                viewModel.addToCart(uuid,product, onSuccess = {
+                                    Toast.makeText(context, "Added to Cart", Toast.LENGTH_SHORT).show()
+                                }, onFailure = {
+                                    Toast.makeText(context, "Something went wrong! Try later", Toast.LENGTH_SHORT).show()
+                                })
                             },
                             shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(Color(0xFFFAB663))
@@ -367,10 +385,12 @@ fun ProductDetailsScreen(navController: NavController){
             }
         }
     }
+
+
 }
 
 @Composable
-fun ProductActionWindow(actionName: String, product: ProductDetailDto){
+fun ProductActionWindow(actionName: String, product: ProductDetailDto, viewModel: BuyerViewModel){
 
     val amount = remember {
         mutableStateOf(1)
@@ -384,6 +404,8 @@ fun ProductActionWindow(actionName: String, product: ProductDetailDto){
     var offeredPrice by remember { mutableStateOf(0.0) }
 
     var message by remember { mutableStateOf("") }
+
+
     Column(
         Modifier
             .padding(24.dp)
@@ -501,9 +523,8 @@ fun ProductActionWindow(actionName: String, product: ProductDetailDto){
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-
-
             }
+
         }
         Spacer(modifier = Modifier
             .background(Color.Gray)
@@ -574,6 +595,21 @@ fun ProductActionWindow(actionName: String, product: ProductDetailDto){
             ,
             onClick = {
 
+                when (actionName) {
+
+                    "Order" -> {
+                        val createOrderDto = CreateOrderDto(uuid, listOf(com.example.farmermarket.data.remote.dto.Product(product.id,amount.value.toDouble(), product.price.toDouble())))
+                        viewModel.createOrder(createOrderDto)
+                    }
+                    "Offer" -> {
+                        val createOfferDto = CreateOfferDto(message, offeredPrice.toInt(), product.id)
+                        viewModel.createOffer(createOfferDto)
+
+                    }
+                    "Add to cart" -> {}
+                    else -> {}
+                }
+
             },
             shape = RoundedCornerShape(10.dp),
             colors = ButtonDefaults.buttonColors(
@@ -604,14 +640,55 @@ fun ProductActionWindow(actionName: String, product: ProductDetailDto){
             Text(text = actionName, color = Color.White, fontSize = 16.sp)
         }
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,){
+//            CircularProgressIndicator(color = Color(0xff4CAD73), strokeWidth = 4.dp)
+            if(viewModel.orderCreationState.value.isLoading){
+                CircularProgressIndicator(color = Color(0xff4CAD73), strokeWidth = 4.dp)
+
+            }else if(viewModel.orderCreationState.value.error != ""){
+                Toast.makeText(LocalContext.current, "Something went wrong! Try later", Toast.LENGTH_SHORT).show()
+                viewModel.orderCreationState.value = viewModel.orderCreationState.value.copy(error = "")
+
+
+            } else if(viewModel.orderCreationState.value.created == true){
+                Toast.makeText(LocalContext.current, "Successfully created", Toast.LENGTH_SHORT).show()
+                viewModel.orderCreationState.value = viewModel.orderCreationState.value.copy(created = null)
+            }
+        }
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,){
+//            CircularProgressIndicator(color = Color(0xff4CAD73), strokeWidth = 4.dp)
+            if(viewModel.offerCreationState.value.isLoading){
+                CircularProgressIndicator(color = Color(0xff4CAD73), strokeWidth = 4.dp)
+
+            }else if(viewModel.offerCreationState.value.error != ""){
+                Toast.makeText(LocalContext.current, "Something went wrong! Try later", Toast.LENGTH_SHORT).show()
+                viewModel.offerCreationState.value = viewModel.offerCreationState.value.copy(error = "")
+
+
+            } else if(viewModel.offerCreationState.value.created == true){
+                Toast.makeText(LocalContext.current, "Successfully created", Toast.LENGTH_SHORT).show()
+                viewModel.offerCreationState.value = viewModel.offerCreationState.value.copy(created = null)
+            }
+        }
 
     }
+
 
 }
 @Composable
 fun BlurredBackgroundDialog(
+    viewModel: BuyerViewModel,
     onDismissRequest: () -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     // Overlay with a blurred background
     Box(
@@ -623,7 +700,7 @@ fun BlurredBackgroundDialog(
         Dialog(onDismissRequest = onDismissRequest) {
             // Dialog content
             Box(
-                modifier = Modifier
+                modifier = Modifier.fillMaxWidth()
                     .background(Color.White, shape = RoundedCornerShape(16.dp))
                     .padding(16.dp)
             ) {

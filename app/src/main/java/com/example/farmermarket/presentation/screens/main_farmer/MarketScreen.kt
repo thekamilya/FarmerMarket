@@ -97,7 +97,7 @@ fun MarketScreen( navController: NavController, viewModel: FarmerViewModel){
         Spacer(modifier = Modifier.height(10.dp))
 
         Image(
-            painter = painterResource(id = R.drawable.logo),
+            painter = painterResource(id = R.drawable.group_771),
             contentDescription = null, // or provide a meaningful description
         )
 

@@ -29,7 +29,6 @@ import com.example.farmermarket.domain.usecase.GetCartUseCase
 import com.example.farmermarket.domain.usecase.GetOrdersUseCase
 import com.example.farmermarket.domain.usecase.GetProductDetailUseCase
 import com.example.farmermarket.domain.usecase.GetProductsUseCase
-import com.example.farmermarket.domain.usecase.GetRealTimeMessagesUseCase
 import com.example.farmermarket.domain.usecase.MarkAsReadUseCase
 import com.example.farmermarket.domain.usecase.SendMessageUseCase
 import com.example.farmermarket.presentation.screens.main_farmer.ChatListState
@@ -74,7 +73,6 @@ class BuyerViewModel  @Inject constructor(
     private val getChatsUseCase: GetChatsUseCase,
     private val getChatUseCase: GetChatUseCase,
     private val sendMessageUseCase: SendMessageUseCase,
-    private val getRealTimeMessagesUseCase: GetRealTimeMessagesUseCase,
     private val getProductsUseCase: GetProductsUseCase,
     private val getProductDetailUseCase: GetProductDetailUseCase,
     private val createOrderUseCase: CreateOrderUseCase,

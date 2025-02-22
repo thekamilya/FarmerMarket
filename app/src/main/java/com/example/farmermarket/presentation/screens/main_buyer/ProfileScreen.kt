@@ -134,13 +134,13 @@ fun ProfileScreen(navController: NavController, viewModel: BuyerViewModel, onLog
                 ) {
                     Text(
                         text = "Total Expenditure: ",
-                        fontSize = 24.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
 
                     Text(
                         text = buyerDashBoard.expenditure.toString() + " kzt",
-                        fontSize = 24.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -168,11 +168,11 @@ fun ProfileScreen(navController: NavController, viewModel: BuyerViewModel, onLog
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "Total Purchases: ", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Total Purchases: ", fontSize = 20.sp, fontWeight = FontWeight.Bold)
 
                     Text(
                         text = buyerDashBoard.totalBoughts.toString(),
-                        fontSize = 24.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -202,7 +202,7 @@ fun ProfileScreen(navController: NavController, viewModel: BuyerViewModel, onLog
                 ) {
                     Text(
                         text = "Product Quantities: ",
-                        fontSize = 24.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }

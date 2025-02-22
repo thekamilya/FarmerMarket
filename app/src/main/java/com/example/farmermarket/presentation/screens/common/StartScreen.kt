@@ -36,7 +36,7 @@ fun StartScreen(navController: NavHostController){
             modifier = Modifier
                 .padding(0.dp)
                 .fillMaxWidth(),
-            painter = painterResource(id = R.drawable.first_screen_graphic),
+            painter = painterResource(id = R.drawable.group_796),
             contentDescription = null, // or provide a meaningful description
             contentScale = ContentScale.Crop
 

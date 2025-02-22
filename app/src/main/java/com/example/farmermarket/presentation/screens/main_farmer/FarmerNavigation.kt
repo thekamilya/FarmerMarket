@@ -173,7 +173,7 @@ fun FarmerNavigation(rootNavController: NavHostController , context: Context) {
 
             NavHost(
                 navController = farmerNavController,
-                startDestination = FarmerScreens.PROFILE.name,
+                startDestination = FarmerScreens.MARKET.name,
                 enterTransition = {
                     EnterTransition.None
                 },

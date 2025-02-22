@@ -142,11 +142,11 @@ fun ProfileScreen(navController: NavController, viewModel: FarmerViewModel, onLo
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "Total Sales: ", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Total Sales: ", fontSize = 20.sp, fontWeight = FontWeight.Bold)
 
                     Text(
                         text = farmerDashBoard.income.toString() + " kzt",
-                        fontSize = 24.sp,
+                        fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -174,7 +174,7 @@ fun ProfileScreen(navController: NavController, viewModel: FarmerViewModel, onLo
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "Product Sales: ", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Product Sales: ", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
                 Spacer(
                     modifier = Modifier
@@ -236,7 +236,7 @@ fun ProfileScreen(navController: NavController, viewModel: FarmerViewModel, onLo
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(text = "Product Quantities: ", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    Text(text = "Product Quantities: ", fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 }
                 Spacer(
                     modifier = Modifier

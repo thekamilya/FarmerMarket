@@ -33,7 +33,6 @@ import com.example.farmermarket.domain.usecase.GetFarmerDashBoardUseCase
 import com.example.farmermarket.domain.usecase.GetFarmerOffersUseCase
 import com.example.farmermarket.domain.usecase.GetProductDetailUseCase
 import com.example.farmermarket.domain.usecase.GetProductsUseCase
-import com.example.farmermarket.domain.usecase.GetRealTimeMessagesUseCase
 import com.example.farmermarket.domain.usecase.GetSoldProductsUseCase
 import com.example.farmermarket.domain.usecase.GetUsernameByUserIdUseCase
 import com.example.farmermarket.domain.usecase.MarkAsReadUseCase
@@ -132,7 +131,6 @@ class FarmerViewModel  @Inject constructor(
     private val getChatsUseCase: GetChatsUseCase,
     private val getChatUseCase: GetChatUseCase,
     private val sendMessageUseCase: SendMessageUseCase,
-    private val getRealTimeMessagesUseCase: GetRealTimeMessagesUseCase,
     private val getProductsUseCase: GetProductsUseCase,
     private val deleteProductUseCase: DeleteProductUseCase,
     private val getProductDetailUseCase: GetProductDetailUseCase,
@@ -647,15 +645,6 @@ class FarmerViewModel  @Inject constructor(
     }
 
 
-    fun getRealTimeMessages() {
-        viewModelScope.launch {
-            getRealTimeMessagesUseCase { message ->
-                // Process the received message
-                Log.d("kama", message)
-                getProducts()
-            }
-        }
-    }
 
     fun connectStomp(productId:Int, onDelete:() -> Unit) {
         val mStompClient = Stomp.over(

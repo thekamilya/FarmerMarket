@@ -10,7 +10,6 @@ import com.example.farmermarket.data.repository.AuthRepositoryImpl
 //import com.example.farmermarket.data.repository.BookRepositoryImpl
 import com.example.farmermarket.data.repository.FarmRepositoryImpl
 import com.example.farmermarket.data.repository.FirebaseRepository
-import com.example.farmermarket.data.repository.WebSocketServiceImpl
 import com.example.farmermarket.domain.repository.AuthRepository
 import com.example.farmermarket.domain.repository.FarmRepository
 import com.example.farmermarket.domain.usecase.AddToCartUseCase
@@ -19,7 +18,6 @@ import com.example.farmermarket.domain.usecase.CreateNewChatUseCase
 import com.example.farmermarket.domain.usecase.GetCartUseCase
 import com.example.farmermarket.domain.usecase.GetChatUseCase
 import com.example.farmermarket.domain.usecase.GetChatsUseCase
-import com.example.farmermarket.domain.usecase.GetRealTimeMessagesUseCase
 import com.example.farmermarket.domain.usecase.GetUsernameByUserIdUseCase
 import com.example.farmermarket.domain.usecase.MarkAsReadUseCase
 import com.example.farmermarket.domain.usecase.SendMessageUseCase
@@ -126,16 +124,6 @@ fun provideFarmApi(): FarmApi {
         return CreateNewChatUseCase()
     }
 
-    @Provides
-    fun provideWebSocketService(): WebSocketServiceImpl {
-        // Provide any required dependencies if needed
-        return WebSocketServiceImpl(/* dependencies */)
-    }
-
-    @Provides
-    fun provideGetRealTimeMessagesUseCase(webSocketService: WebSocketServiceImpl): GetRealTimeMessagesUseCase {
-        return GetRealTimeMessagesUseCase(webSocketService)
-    }
 
     @Provides
     @Singleton
